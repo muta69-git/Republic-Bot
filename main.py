@@ -332,7 +332,16 @@ async def on_message(message):
     elif command == "warns":
       if _hasr_(admin_role):
         if len(args) < 1:
-          await chansend("argument error")
+          warns = qik.get(f'warns.{message.author.id}');
+
+          warnings_embed = discord.Embed(title = "*warnings:*", description = f"<@!{message.author.id}> has {len(warns)} warnings", color = embed_colors["info"])
+
+          warning_num = 1;
+          for warning in warns:
+            warnings_embed.add_field(name = f"*warning {warning_num}:*", value = warning["reason"]);
+            warning_num += 1;
+
+          await embedsend(warnings_embed);
         else:
           if has_mention(args[0]):
             ment_user = _pment_(args[0]);
@@ -350,9 +359,13 @@ async def on_message(message):
 
               await embedsend(warnings_embed);
           else:
-            await chansend("argument error");
+            invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signature:*", description = "*`arg1 == user value`\nproper use:  `!warn <@user (arg1)>`*", color = embed_colors["err"]);
+
+            await embedsend(embed = invalid_arg_sig_embed);
       else:
-        await chansend("permission error");
+        invalid_perms_embed = discord.Embed(title = "*invalid permissions:*", description = "*`message.author != guild.admin`\nproper use:  `!warns <@user (arg1)>`*", color = embed_colors["err"]);
+
+        await embedsend(embed = invalid_perms_embed);
         
     elif command == "dpy":
       if _hasr_(admin_role):
