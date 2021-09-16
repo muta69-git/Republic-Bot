@@ -4,20 +4,34 @@ import os;
 from qikdb import DB;
 from server import ping_server;
 from ro_py import Client as cli;
-from dpy import DPY;
 
-roco = os.environ['COOKIE']
-client = discord.Client();
+from CMDS.HONOR.honor import run as honor_run;
+from CMDS.HONOR.honor_add import run as honor_add_run;
+from CMDS.HONOR.honor_del import run as honor_del_run;
+from CMDS.HONOR.honor_set import run as honor_set_run; 
+from CMDS.MISC.help import run as help_run;
+from CMDS.MISC.restart import run as restart_run;
+from CMDS.MISC.kill import run as kill_run;
+from CMDS.MOD.mute import run as mute_run;
+from CMDS.MOD.kick import run as kick_run;
+from CMDS.MOD.ban import run as ban_run;
+
+roco = os.environ['COOKIE'];
 ro_cli = cli();
+
 qik = DB(config = {
   "name": "database",
-  "path": "database",
-  "directory": "DB"
+  "directory": "DB",
+  "path": 'database'
 });
 
-@client.event
+client = discord.Client();
+
+@client.event 
 async def on_ready():
+  os.system("clear");
   print('logged in as {0.user}'.format(client));
+  await client.change_presence(activity=discord.Activity(type=discord.ActivityType.streaming, name="myself doing ur mom"));
 
 @client.event
 async def on_message(message):
@@ -29,20 +43,19 @@ async def on_message(message):
   honor = qik.get(f'honor.{message.author.id}');
 
   # Essential variables
-  pfx = "!";
+  pfx = os.environ["PREFIX"];
   msg = message.content;
   args = msg.split(" ");
   admin_role = "allah";
   command = args[0].replace(pfx, ""); args.pop(0);
   chansend = lambda string: message.channel.send(string);
-  dpy = DPY(pfx, message, client);
-  embed_colors = {"err": "#ed3615", "info": "#FFFFFF", "honor": {"view": "#f7c736", "modified": "#5cfa4b"}, "moderation": "#0413bf"};
+  #dpy = DPY(pfx, message, client); #Not needed for now, trynna fix still.
+  embed_colors = {"err": discord.Color.from_rgb(255, 144, 97), "info": discord.Color.from_rgb(255, 255, 255), "honor": {"view": discord.Color.from_rgb(247, 199, 54), "modified": discord.Color.from_rgb(92, 250, 75)}, "moderation": discord.Color.from_rgb(4, 19, 191)};
 
   # Functions
 
-  def embedsend(**kwargs):
-    if bool(kwargs.get("embed")):
-      message.channel.send(embed = kwargs.get("embed"));
+  async def embedsend(discord_embed):
+    await message.channel.send(embed = discord_embed);
 
   def _hasr_(name):
     for x in message.author.roles:
@@ -64,176 +77,39 @@ async def on_message(message):
       return False;
 
   def get_rank(user_id):
-    return "Placeholder";
+    return "Placeholder"; #placeholder until ranks and rank xp is made.
 
   if msg.startswith(pfx): 
     
-      # ===== HELP COMMAND ============================================================== #
+    # Help command #
     if command == "help":
-      help_embed = discord.Embed(title = "*current commands:*", decription = "", color = embed_colors["info"]);
+      help_run(discord, message, args, qik, embed_colors);
+      
 
-      help_embed.add_field(name = f"*• `{pfx}honor` or `{pfx}honor <@user>`*", value = "* - will return requested user\'s honor.*", inline = False);
-
-      help_embed.add_field(name = f"*• `{pfx}honor.add <@user> <int>`*", value = "* - will add honor to requested user.*", inline = False);
-
-      help_embed.add_field(name = f"*• `{pfx}honor.del <@user> <int>`*", value = "* - will remove honor from requested user.*");
-
-      help_embed.add_field(name = f"*• `{pfx}honor.set <@user> <int>`*", value = "* - will set the honor of requested user*");
-
-      await embedsend(embed = help_embed);
-
-      # ===== HONOR COMMAND ============================================================== #
+     
+    # Honor command #
     elif command == "honor":
-      if len(args) <= 0:
-        user = message.author;
-        honor = qik.get(f'honor.{user.id}');
+      honor_run(discord, message, args, qik, embed_colors);
 
-        honor_embed = discord.Embed(title = f"*<@!{user}>\'s honor:*", description = f"*Rank: `{get_rank(user)}`\n\nHonor: `{honor}`*", color = embed_colors["honor"]["view"]);
-
-        await embedsend(embed = honor_embed);
-      elif has_mention(args[0]): 
-        ment_user = _pment_(args[0]);
-        if not qik.exists(f'honor.{ment_user}'):
-          db_missing_embed = discord.Embed(title = "*invalid arg signature:*", description = "*`arg1 == user value`\nproper use:  `!honor`  or  `!honor <@user (arg1)>`\nuser may also not be in database*", color = embed_colors["err"]);
-
-          await embedsend(embed = db_missing_embed);
-        else:
-          honor = qik.get(f'honor.{ment_user}');
-
-          honor_embed = discord.Embed(title = f"*{args[0]}\'s honor:*", description = f"*Rank: `{get_rank(ment_user)}`\n\nHonor: `{honor}`*", color = embed_colors["honor"]["view"]);
-
-          await embedsend(embed = honor_embed);
-      else:
-        invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signature:*", description = "*`arg1 == user value`\nproper use:  `!honor` or `!honor <@user (arg1)>`*", color = embed_colors["err"]);
-
-        await embedsend(embed = invalid_arg_sig_embed);
-
-      # ===== HONOR ADDING COMMAND ======================================================= #
+    # Honor add command #
     elif command == "honor.add":
-      if _hasr_(admin_role):
-        if len(args) <= 1:
-          invalid_arg_index_embed = discord.Embed(title = "*invalid args index:*", description = f"*`provided args: {len(args)}`\nproper use:  `!honor.add <@user (arg1)> <int (arg2)>`*", color = embed_colors["err"]);
+      honor_add_run(discord, message, args, qik, embed_colors, admin_role);
 
-          await embedsend(embed = invalid_arg_index_embed);
-        else:
-          if has_mention(args[0]):
-            ment_user = _pment_(args[0]);
-            if str.isnumeric(args[1]):
-              honor_sum = int(args[1]);
-              if not qik.exists(f'honor.{ment_user}'):
-                invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signatures:*", description = "*invalid arg signatures:  `arg1 == user value, arg2 == int value`\nproper use:  `!honor.add <@user (arg1)> <int (arg2)>`\nuser may also not be in database*", color = embed_colors["err"]);
-
-                await embedsend(embed = invalid_arg_sig_embed);
-              else:
-                honor = qik.add(f'honor.{ment_user}',  honor_sum);
-
-                honor_added_embed = discord.Embed(title = "*added honor:*", description = f"*<@!{message.author.id}> has added {honor_sum} honor to <@!{ment_user}>.\nthey now have {honor} honor.*", color = embed_colors["honor"]["modified"]);
-
-                await embedsend(embed = honor_added_embed);
-            else:
-              invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signature:*", description = "*`arg2 == int value`\nproper use:  `!honor.add <@user (arg1)> <int (arg2)>`*", color = embed_colors["err"]); 
-
-              await embedsend(embed = invalid_arg_sig_embed);
-          else:
-            if not has_mention(args[0]) and not str.isnumeric(args[1]):
-              invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signatures:*", description = "*`arg1 == user value, arg2 == int value`\nproper use:  `!honor.add <@user (arg1)> <int (arg2)>`*", color = embed_colors["err"]);
-
-              await embedsend(embed = invalid_arg_sig_embed);
-            elif not has_mention(args[0]):
-              invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signature:*", description = "*`arg1 == user value`\nproper use:  `!honor.add <@user (arg1)> <int (arg2)>`*", color = embed_colors["err"]);
-
-              await embedsend(embed = invalid_arg_sig_embed);
-      else:
-        invalid_perms_embed = discord.Embed(title = "*invalid permissions:*", description = "*`message.author != guild.admin`\nproper use:  `!honor.add <@user (arg1)> <int (arg2)>`*", color = embed_colors["err"]);
-
-        await embedsend(embed = invalid_perms_embed);
-
-      # ===== HONOR REMOVE COMMAND ======================================================= #
+    # Honor remove command #
     elif command == "honor.del":
-      if _hasr_(admin_role):
-        if len(args) <= 1:
-          invalid_arg_index_embed = discord.Embed(title = "*invalid arg index:*", description = "*`provided args: {len(args)}`\nproper use:  `!honor.del <@user (arg1)> <int (arg2)>`*", color = embed_colors["err"]);
+     honor_del_run(discord,message, args, admin_role, embed_colors, qik);
 
-          await embedsend(embed = invalid_arg_index_embed);
-        else:
-          if has_mention(args[0]): 
-            ment_user = _pment_(args[0]);
-            if str.isnumeric(args[1]):
-              honor_sum = int(args[1]);
-              if not qik.exists(f'honor.{ment_user}'):
-                invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signatures:*", description = "*`arg1 == user value, arg2 == int value`\nproper use:  `!honor.del <@user (arg1)> <int (arg2)>`\nuser may also not be in database*", color = embed_colors["err"]);
-
-                await embedsend(embed = invalid_arg_sig_embed);
-              else:
-                honor = qik.subtract(f'honor.{ment_user}',  honor_sum);
-
-                honor_subtracted_embed = discord.Embed(title = "*honor subtracted:*", description = f"<@!{message.author.id}> has removed {honor_sum} honor from <@!{ment_user}>.\nthey now have {honor} honor.*", color = embed_colors["honor"]["modified"]);
-
-                await embedsend(embed = honor_subtracted_embed);
-            else: 
-              invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signature:*", description = "*invalid arg signature:  `arg2 == int value`\nproper use:  `!honor.del <@user (arg1)> <int (arg2)>`*", color = embed_colors["err"]);
-
-              await embedsend(embed = invalid_arg_sig_embed);
-          else:
-            if not has_mention(args[0]) and not str.isnumeric(args[1]):
-              invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signatures:*", description = "*`arg1 == user value, arg2 == int value`\nproper use:  `!honor.del <@user (arg1)> <int (arg2)>`*", color = embed_colors["err"]);
-
-              await embedsend(embed = invalid_arg_sig_embed);
-            elif not has_mention(args[0]):
-              invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signature:*", description = "*`arg1 == user value`\nproper use:  `!honor.del <@user (arg1)> <int (arg2)>`*", color = embed_colors["err"]);
-
-              await embedsend(embed = invalid_arg_sig_embed);
-      else:
-        invalid_perms_embed = discord.Embed(title = "*invalid permissions:*", description = "*`message.author != guild.admin`\nproper use:  `!honor.del <@user (arg1)> <int (arg2)>`*", color = embed_colors["err"]);
-
-        await embedsend(embed = invalid_perms_embed);
-
-      # ===== HONOR SET COMMAND ========================================================== #
+    # Honor set command #
     elif command == "honor.set":
-      if _hasr_(admin_role):
-        if len(args) < 1:
-          invalid_arg_index_embed = discord.Embed(title = "*invalid arg index:*", description = "*`provided args: {len(args)}`\nproper use:  `!honor.set <@user (arg1)> <int (arg2)>", color = embed_colors["err"]);
-          
-          await embedsend(embed = invalid_arg_index_embed);
-        else:
-          if has_mention(args[0]): 
-            ment_user = _pment_(args[0]);
-            if str.isnumeric(args[1]):
-              honor_sum = int(args[1]);
-              if not qik.exists(f'honor.{ment_user}'):
-                invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signatures:*", description = "*signatures:  `arg1 == user value, arg2 == int value`\nproper use:  `!honor.set <@user (arg1)> <int (arg2)>`\nuser may also not be in database*", color = embed_colors["err"]);
+      honor_set_run(discord, message, args, embed_colors, admin_role, qik);
 
-                await embedsend(embed = invalid_arg_sig_embed);
-              else:
-                honor = qik.set(f'honor.{ment_user}',  honor_sum);
-
-                honor_set_embed = discord.Embed(title = "*set honor:*", description = f"*<@!{message.author.id}> has set {honor_sum} honor to <@!{ment_user}>.\nthey now have {honor} honor.*", color = embed_colors["honor"]["modified"]);
-
-                await embedsend(embed = honor_set_embed);
-            else: 
-              invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signature:*", description = "*`arg2 == int value`\nproper use:  `!honor.set <@user (arg1)> <int (arg2)>`*", color = embed_colors["err"]);
-
-              await embedsend(embed = invalid_arg_sig_embed);
-          else:
-            if not has_mention(args[0]) and not str.isnumeric(args[1]):
-              invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signatures:*", description = "*`arg1 == user value, arg2 == int value`\nproper use:  `!honor.set <@user (arg1)> <int (arg2)>`*", color = embed_colors["err"]);
-
-              await embedsend(embed = invalid_arg_sig_embed);
-            elif not has_mention(args[0]):
-              invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signature:*", description = "*`arg1 == user value`\nproper use:  `!honor.set <@user (arg1)> <int (arg2)>`*");
-
-              await embedsend(embed = invalid_arg_sig_embed);
-      else:
-        invalid_perms_embed = discord.Embed(title = "*invalid permissions:*", description = "`message.author != guild.admin`\nproper use:  `!honor.set <@user (arg1)> <int (arg2)>`*", color = embed_colors["err"]);
-
-        await embedsend(embed = invalid_perms_embed);
-
+    # Ban command #
     elif command == "ban":
       if _hasr_(admin_role):
         if len(args) < 1:
           invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signature:*", description = "*`arg1 == user value`\nproper use:  `!ban <@user (arg1)>`*", color = embed_colors["err"]);
 
-          await embedsend(embed = invalid_arg_sig_embed);
+          await embedsend(invalid_arg_sig_embed);
         else:
           if has_mention(args[0]): 
             ment_user = _pment_(args[0]);
@@ -241,7 +117,7 @@ async def on_message(message):
             try:
               banned_embed = discord.Embed(title = "*moderation:*", description = f"you have been banned from {message.guild.name} for: {given_reason}.", color = embed_colors["moderation"]);
 
-              await client.send_message(ment_user, embed = banned_embed);
+              await client.send_message(ment_user, banned_embed);
 
               async def ban_user(ment_user: discord.Member):
                 await ment_user.ban(reason = given_reason);
@@ -250,22 +126,22 @@ async def on_message(message):
 
               banned_user_embed = discord.Embed(title = "*moderation:*", description = f"succesfully, banned {args[0]} for: {given_reason}", color = embed_colors["moderation"]);
 
-              await embedsend(embed = banned_user_embed);
+              await embedsend(banned_user_embed);
             except:
               ban_error_embed = discord.Embed(title = "*unable to ban:*", description = f"*i was unable to ban mentioned user: {args[0]}, this could be due to having a higher role than me, or admin permissions.*", color = embed_colors["err"]);
 
-              await embedsend(embed = ban_error_embed);
+              await embedsend(ban_error_embed);
           else:
             invalid_perms_embed = discord.Embed(title = "*invalid permissions:*", description = "*`message.author != guild.admin`\nproper use:  `!ban <@user (arg1)>`*", color = embed_colors["err"]);
 
-            await embedsend(embed = invalid_perms_embed);
+            await embedsend(invalid_perms_embed);
               
     elif command == "kick":
       if _hasr_(admin_role):
         if len(args) < 1:
           invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signature:*", description = "*`arg1 == user value`\nproper use:  `!ban <@user (arg1)>`*", color = embed_colors["err"]);
 
-          await embedsend(embed = invalid_arg_sig_embed);
+          await embedsend(invalid_arg_sig_embed);
         else:
           if has_mention(args[0]): 
             ment_user = _pment_(args[0]);
@@ -273,7 +149,7 @@ async def on_message(message):
             try:
               kicked_embed = discord.Embed(title = "*moderation:*", description = f"you have been kicked from {message.guild.name} for: {given_reason}.", color = embed_colors["moderation"]);
 
-              await client.send_message(ment_user, embed = kicked_embed);
+              await client.send_message(ment_user, kicked_embed);
               
               async def kick_user(ment_user: discord.Member):
                 await ment_user.kick(reason = given_reason);
@@ -282,15 +158,15 @@ async def on_message(message):
 
               kicked_user_embed = discord.Embed(title = "*moderation:*", description = f"succesfully, kicked {args[0]} for: {given_reason}", color = embed_colors["moderation"]);
 
-              embedsend(embed = kicked_user_embed);
+              embedsend(kicked_user_embed);
             except:
               kick_error_embed = discord.Embed(title = "*unable to ban:*", description = f"*i was unable to kick mentioned user: {args[0]}, this could be due to having a higher role than me, or admin permissions.*", color = embed_colors["err"]);
 
-              await embedsend(embed = kick_error_embed);
+              await embedsend(kick_error_embed);
       else:
         invalid_perms_embed = discord.Embed(title = "*invalid permissions:*", description = "*`message.author != guild.admin`\nproper use:  `!ban <@user (arg1)>`*", color = embed_colors["err"]);
 
-        await embedsend(embed = invalid_perms_embed);
+        await embedsend(invalid_perms_embed);
     
       # I AM WORKING ON THE WARN AND WARNS COMMANDS
     elif command == "warn":
@@ -298,7 +174,7 @@ async def on_message(message):
         if len(args) < 1:
           invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signature:*", description = "*`arg1 == user value`\nproper use:  `!warn <@user (arg1)> <reason (arg2)>`*", color = embed_colors["err"]);
 
-          await embedsend(embed = invalid_arg_sig_embed);
+          await embedsend(invalid_arg_sig_embed);
         else:
           if has_mention(args[0]):
             ment_user = _pment_(args[0]);
@@ -306,7 +182,7 @@ async def on_message(message):
 
             warned_embed = discord.Embed(title = "*moderation:*", description = f"you have been warned in {message.guild.name} for {given_reason}.", color = embed_colors["moderation"]);
 
-            client.send_message(ment_user, embed = warned_embed);
+            client.send_message(ment_user, warned_embed);
             
             if not qik.exists(f'warns.{ment_user}'):
               qik.set(f'warns.{ment_user}', []);
@@ -323,7 +199,7 @@ async def on_message(message):
           else:
             invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signature:*", description = "*`arg1 == user value`\nproper use:  `!warn <@user (arg1)> <reason (arg2)>`*", color = embed_colors["err"]);
 
-            await embedsend(embed = invalid_arg_sig_embed);
+            await embedsend(invalid_arg_sig_embed);
       else:
         invalid_perms_embed = discord.Embed(title = "*invalid permissions:*", description = "*`message.author != guild.admin`\nproper use:  `!warn <@user (arg1)> <reason (arg2)>`*", color = embed_colors["err"]);
 
@@ -361,16 +237,32 @@ async def on_message(message):
           else:
             invalid_arg_sig_embed = discord.Embed(title = "*invalid arg signature:*", description = "*`arg1 == user value`\nproper use:  `!warn <@user (arg1)>`*", color = embed_colors["err"]);
 
-            await embedsend(embed = invalid_arg_sig_embed);
+            await embedsend(invalid_arg_sig_embed);
       else:
         invalid_perms_embed = discord.Embed(title = "*invalid permissions:*", description = "*`message.author != guild.admin`\nproper use:  `!warns <@user (arg1)>`*", color = embed_colors["err"]);
 
-        await embedsend(embed = invalid_perms_embed);
+        await embedsend(invalid_perms_embed);
         
-    elif command == "dpy":
-      if _hasr_(admin_role):
-        await dpy.msg.send("Test");
+    elif command == "mute": # Work In Progress.
+      mute_run(discord, client, message, args, qik, admin_role, embed_colors);
+  
+    elif command == "close" or command == "logout" or command == "kill":
+      kill_run(message, client);
     
+    elif command == "restart":
+      restart_run(discord, message);
+      
+        
 
+
+
+
+    else: # Acts as a default if no command found.
+      command_not_found_embed = discord.Embed(title = "*invalid command:*", description = f"*`{pfx}{command}`is not a command please use {pfx}help for the list of commands.");
+
+      embedsend(command_not_found_embed);
+  else:
+    return;
+    
 ping_server();
 client.run(os.environ['TOKEN']);
