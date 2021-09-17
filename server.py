@@ -1,11 +1,12 @@
 # For when we host bot using uptime-robot, and Flask.
 
-from flask import Flask;
+from flask import Flask
 from threading import Thread;
 import logging;
 import random;
+import os;
 
-app = Flask('');
+app = Flask('')
 log = logging.getLogger('werkzeug');
 log.disabled = True;
 
