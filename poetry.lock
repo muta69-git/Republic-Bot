@@ -258,6 +258,14 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "node-py"
+version = "0.0.25"
+description = "Easy to use, package that brings aspects of node.js to python, but improvised and with new features."
+category = "main"
+optional = false
+python-versions = ">=3.8,<4.0"
+
+[[package]]
 name = "qikdb"
 version = "0.3.1"
 description = "Simple, and easy to use Python Database using JSON."
@@ -391,7 +399,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "19b4ff36a618a73373094aec3d01d5e83d6fecce896990efc546f1efa5b84ccc"
+content-hash = "ae9e52a8873148e140b8e28182131837062b6f756f999de5ce434d8aafe85c4b"
 
 [metadata.files]
 aiohttp = [
@@ -649,6 +657,10 @@ multidict = [
     {file = "multidict-5.1.0-cp39-cp39-win32.whl", hash = "sha256:fc13a9524bc18b6fb6e0dbec3533ba0496bbed167c56d0aabefd965584557d80"},
     {file = "multidict-5.1.0-cp39-cp39-win_amd64.whl", hash = "sha256:7df80d07818b385f3129180369079bd6934cf70469f99daaebfac89dca288359"},
     {file = "multidict-5.1.0.tar.gz", hash = "sha256:25b4e5f22d3a37ddf3effc0710ba692cfc792c2b9edfb9c05aefe823256e84d5"},
+]
+node-py = [
+    {file = "node_py-0.0.25-py3-none-any.whl", hash = "sha256:e6294c9ec217bb93bf4964b8a9ef93b1f1da82d4a511ee63a0789af6717f6ed0"},
+    {file = "node_py-0.0.25.tar.gz", hash = "sha256:670c66e25145c4cc99c870a8e8295eaa4e4d8bf1a70f4e0b96b302e1b1a4f635"},
 ]
 qikdb = [
     {file = "qikdb-0.3.1-py3-none-any.whl", hash = "sha256:fe7a5134e7e7ca719c9d37ceb006968a745f4556bc31d64386a17e1c44e9393c"},

@@ -2,16 +2,19 @@
   "ranks": [
     {
       "id": 1,
-      "title": "cadet",
+      "name": "E1",
+      "title": "Cadet",
       "req": 0
     },
     {
       "id": 2,
+      "name": "E2",
       "title": " ",
       "req": 15
     },
     {
       "id": 3,
+      "name": "E3",
       "title": " ",
       "req": 30
     }

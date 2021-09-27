@@ -1,20 +1,41 @@
-  # general imports 
 import discord;
+
+# discord imports #
+
+import discord.ext;
+from discord.utils import get;
+from discord.ext import commands, tasks;
+from discord.ext.commands import has_permissions,  CheckFailure, check;
+
+# general imports #
 import os;
+import json;
+from node_py import static, cons, typeof, color, math, contains
 from qikdb import DB;
 from server import ping_server;
 from ro_py import Client as cli;
 from datetime import datetime;
 from dpy import DPY;
+from time import sleep;
+now = datetime.now();
 
-now = datetime.now()
+print("boot?")
+password_ = input('pass: ')
+if password_ == str(os.environ['password']):
+  cons.log('OK')
+  sleep(0.5)
+  cons.clear()
+if not password_ == str(os.environ['password']):
+  cons.log('NO')
+  sleep(0.5)
+  cons.clear()
+  exit("Incorrect boot password.")
 
-current_time = now.strftime("%H:%M:%S")
-print("Current Time =", current_time)
+current_time = now.strftime("%H:%M:%S");
 
-roco = os.environ['COOKIE']
+roco = os.environ['COOKIE'];
 client = discord.Client();
-ro_cli = cli();
+
 qik = DB(config = {
   "name": "database",
   "path": "database",
@@ -23,7 +44,46 @@ qik = DB(config = {
 
 @client.event
 async def on_ready():
-  print('logged in as {0.user}'.format(client));
+  cons.log('LOADING: [----------] 000%');
+  sleep(0.1)
+  cons.clear()
+  cons.log('LOADING: [#---------] 010%');
+  sleep(0.1)
+  cons.clear()
+  cons.log('LOADING: [##--------] 020%');
+  sleep(0.1)
+  cons.clear()
+  cons.log('LOADING: [###-------] 030%');
+  sleep(0.1)
+  cons.clear()
+  cons.log('LOADING: [####------] 040%');
+  sleep(0.1)
+  cons.clear()
+  cons.log('LOADING: [#####-----] 050%');
+  sleep(0.1)
+  cons.clear()
+  cons.log('LOADING: [######----] 060%');
+  sleep(0.1)
+  cons.clear()
+  cons.log('LOADING: [#######---] 070%');
+  sleep(0.1)
+  cons.clear()
+  cons.log('LOADING: [########--] 080%');
+  sleep(0.1)
+  cons.clear()
+  cons.log('LOADING: [#########-] 090%');
+  sleep(0.1)
+  cons.clear()
+  cons.log('LOADING: [##########] 100%');
+  sleep(0.1)
+  cons.clear()
+  cons.log('PROCESS COMPLETED')
+  sleep(1)
+  cons.clear()
+  cons.log(f' > logged in as {client.user}');
+  sleep(0.25)
+  cons.log(f' - time started: {current_time}')
+
 
 @client.event
 async def on_message(message):
@@ -40,20 +100,25 @@ async def on_message(message):
   args = msg.split(" ");
   admin_role = "allah";
   command = args[0].replace(pfx, ""); args.pop(0);
-  chansend = lambda string: message.channel.send(string)
-  embedsend = lambda discord_embed: message.channel.send(embed = discord_embed);
 
-  dpy = DPY(pfx, message, client);
+  #group_id = 0;
+  #global group;
+ # group = await roblox.get_group(group_id);
+  chansend = lambda string: message.channel.send(string)
+
+  embedsend = lambda discord_embed: message.channel.send(embed = discord_embed)
+
+  #dpy = DPY(pfx, message, client);
+
   embed_colors = {
     "err": discord.Color.from_rgb(252, 62, 28), 
     "info": discord.Color.from_rgb(255, 255, 255), "honor": {
-    "view": discord.Color.from_rgb(247, 199, 54), "modified": discord.Color.from_rgb(92, 250, 75)
-  }, 
-  "moderation": discord.Color.from_rgb(4, 19, 191)
+      "view": discord.Color.from_rgb(247, 199, 54), "modified": discord.Color.from_rgb(92, 250, 75)
+    }, 
+    "moderation": discord.Color.from_rgb(4, 19, 191)
   };
 
-  # Fucktions
-
+  # Functions
   def _hasr_(name):
     for x in message.author.roles:
       if x.name == name:
@@ -74,7 +139,7 @@ async def on_message(message):
       return False;
 
   def get_rank(user_id):
-    return "Placeholder";
+    pass;
 
   if msg.startswith(pfx): 
     
@@ -82,15 +147,15 @@ async def on_message(message):
     if command == "help":
       help_embed = discord.Embed(title = "**CURRENT COMMANDS**", color = embed_colors["info"]);
 
-      help_embed.add_field(name = f"**{pfx}honor or `{pfx}honor <@user>**", value = "*will return requested user\'s honor.*", inline = False);
+      help_embed.add_field(name = f"{pfx}honor or {pfx}honor <@user>", value = "*will return requested user\'s honor.*", inline = False);
 
-      help_embed.add_field(name = f"**{pfx}honor.add <@user> <int>**", value = "*will add honor to requested user.*", inline = False);
+      help_embed.add_field(name = f"{pfx}honor.add <@user> <int>", value = "*will add honor to requested user.*", inline = False);
 
-      help_embed.add_field(name = f"**{pfx}honor.del <@user> <int>**", value = "*will remove honor from requested user.*");
+      help_embed.add_field(name = f"{pfx}honor.del <@user> <int>", value = "*will remove honor from requested user.*");
 
-      help_embed.add_field(name = f"**{pfx}honor.set <@user> <int>**", value = "*will set the honor of requested user*");
+      help_embed.add_field(name = f"{pfx}honor.set <@user> <int>", value = "*will set the honor of requested user*");
 
-      help_embed.set_footer(text = current_time);
+      help_embed.set_footer(text = f'time sent: {current_time}');
       
       await embedsend(help_embed);
 
@@ -283,14 +348,11 @@ async def on_message(message):
             ment_user = _pment_(args[0]);
             given_reason = args[1:];
             try:
-              kicked_embed = discord.Embed(title = "*moderation:*", description = f"you have been kicked from {message.guild.name} for: {given_reason}.", color = embed_colors["moderation"]);
-
-              await client.send_message(ment_user, kicked_embed);
               
               async def kick_user(ment_user: discord.Member):
                 await ment_user.kick(reason = given_reason);
               
-              kick_user(ment_user);
+              await kick_user(ment_user);
 
               kicked_user_embed = discord.Embed(title = "*moderation:*", description = f"succesfully, kicked {args[0]} for: {given_reason}", color = embed_colors["moderation"]);
 
@@ -314,11 +376,11 @@ async def on_message(message):
         else:
           if has_mention(args[0]):
             ment_user = _pment_(args[0]);
-            given_reason = args[1:];
+            given_reason = " ".join(args[1:]);
 
             warned_embed = discord.Embed(title = "*moderation:*", description = f"you have been warned in {message.guild.name} for {given_reason}.", color = embed_colors["moderation"]);
 
-            client.send_message(ment_user, warned_embed);
+            message.author.send(ment_user, warned_embed);
             
             if not qik.exists(f'warns.{ment_user}'):
               qik.set(f'warns.{ment_user}', []);
@@ -339,7 +401,7 @@ async def on_message(message):
       else:
         invalid_perms_embed = discord.Embed(title = "*invalid permissions:*", description = "*`message.author != guild.admin`\nproper use:  `!warn <@user (arg1)> <reason (arg2)>`*", color = embed_colors["err"]);
 
-        embedsend(invalid_perms_embed);
+        await embedsend(invalid_perms_embed);
 
     elif command == "warns":
       if _hasr_(admin_role):
@@ -379,10 +441,15 @@ async def on_message(message):
 
         await embedsend(invalid_perms_embed);
         
-    elif command == "dpy":
-      if _hasr_(admin_role):
-        await dpy.msg.send("Test");
+    elif command == "test":
+      get_rank(0);
     
 
+
+    else: # Default
+      command_not_found_embed = discord.Embed(title = "**COMMAND NOT FOUND:**", description = f"command - {pfx}{command}, not found.", color = embed_colors["err"]);
+      embedsend(command_not_found_embed);
+    
 ping_server();
 client.run(os.environ['TOKEN']);
+
