@@ -27,7 +27,7 @@ if password_ == str(os.environ['password']):
 if not password_ == str(os.environ['password']):
   cons.log('NO')
   sleep(0.5)
-  cons.clear()
+  cons.clear();
   exit("Incorrect boot password.")
 
 current_time = now.strftime("%H:%M:%S");
