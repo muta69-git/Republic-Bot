@@ -1,7 +1,6 @@
 import discord;
 
 # discord imports #
-
 import discord.ext;
 from discord.utils import get;
 from discord.ext import commands, tasks;
@@ -34,6 +33,7 @@ if not password_ == str(os.environ['password']):
 current_time = now.strftime("%H:%M:%S");
 
 roco = os.environ['COOKIE'];
+
 client = discord.Client();
 
 qik = DB(config = {
@@ -75,7 +75,7 @@ async def on_ready():
   sleep(0.1)
   cons.clear()
   cons.log('LOADING: [##########] 100%');
-  sleep(0.1)
+  sleep(0.5)
   cons.clear()
   cons.log('PROCESS COMPLETED')
   sleep(1)
@@ -83,7 +83,6 @@ async def on_ready():
   cons.log(f' > logged in as {client.user}');
   sleep(0.25)
   cons.log(f' - time started: {current_time}')
-
 
 @client.event
 async def on_message(message):
@@ -102,8 +101,6 @@ async def on_message(message):
   command = args[0].replace(pfx, ""); args.pop(0);
 
   #group_id = 0;
-  #global group;
- # group = await roblox.get_group(group_id);
   chansend = lambda string: message.channel.send(string)
 
   embedsend = lambda discord_embed: message.channel.send(embed = discord_embed)
@@ -449,7 +446,7 @@ async def on_message(message):
     else: # Default
       command_not_found_embed = discord.Embed(title = "**COMMAND NOT FOUND:**", description = f"command - {pfx}{command}, not found.", color = embed_colors["err"]);
       embedsend(command_not_found_embed);
-    
+
 ping_server();
 client.run(os.environ['TOKEN']);
 
